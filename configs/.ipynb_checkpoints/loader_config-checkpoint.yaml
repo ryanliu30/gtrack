@@ -1,0 +1,30 @@
+data_test:
+- HToBB:/global/cfs/cdirs/m3443/usr/ryanliu/JetClass/Pythia/test_20M/HToBB_*.root
+- HToCC:/global/cfs/cdirs/m3443/usr/ryanliu/JetClass/Pythia/test_20M/HToCC_*.root
+- HToGG:/global/cfs/cdirs/m3443/usr/ryanliu/JetClass/Pythia/test_20M/HToGG_*.root
+- HToWW2Q1L:/global/cfs/cdirs/m3443/usr/ryanliu/JetClass/Pythia/test_20M/HToWW2Q1L_*.root
+- HToWW4Q:/global/cfs/cdirs/m3443/usr/ryanliu/JetClass/Pythia/test_20M/HToWW4Q_*.root
+- TTBar:/global/cfs/cdirs/m3443/usr/ryanliu/JetClass/Pythia/test_20M/TTBar_*.root
+- TTBarLep:/global/cfs/cdirs/m3443/usr/ryanliu/JetClass/Pythia/test_20M/TTBarLep_*.root
+- WToQQ:/global/cfs/cdirs/m3443/usr/ryanliu/JetClass/Pythia/test_20M/WToQQ_*.root
+- ZToQQ:/global/cfs/cdirs/m3443/usr/ryanliu/JetClass/Pythia/test_20M/ZToQQ_*.root
+- ZJetsToNuNu:/global/cfs/cdirs/m3443/usr/ryanliu/JetClass/Pythia/test_20M/ZJetsToNuNu_*.root
+data_train:
+- ZJetsToNuNu:/global/cfs/cdirs/m3443/usr/ryanliu/JetClass/Pythia/train_100M/ZJetsToNuNu_*.root
+- TTBar:/global/cfs/cdirs/m3443/usr/ryanliu/JetClass/Pythia/train_100M/TTBar_*.root
+- WToQQ:/global/cfs/cdirs/m3443/usr/ryanliu/JetClass/Pythia/train_100M/WToQQ_*.root
+- ZToQQ:/global/cfs/cdirs/m3443/usr/ryanliu/JetClass/Pythia/train_100M/ZToQQ_*.root
+data_train_downstream:
+- HToBB:/global/cfs/cdirs/m3443/usr/ryanliu/JetClass/Pythia/train_100M/HToBB_*.root
+- HToCC:/global/cfs/cdirs/m3443/usr/ryanliu/JetClass/Pythia/train_100M/HToCC_*.root
+- HToGG:/global/cfs/cdirs/m3443/usr/ryanliu/JetClass/Pythia/train_100M/HToGG_*.root
+- HToWW2Q1L:/global/cfs/cdirs/m3443/usr/ryanliu/JetClass/Pythia/train_100M/HToWW2Q1L_*.root
+- HToWW4Q:/global/cfs/cdirs/m3443/usr/ryanliu/JetClass/Pythia/train_100M/HToWW4Q_*.root
+- TTBar:/global/cfs/cdirs/m3443/usr/ryanliu/JetClass/Pythia/train_100M/TTBar_*.root
+- TTBarLep:/global/cfs/cdirs/m3443/usr/ryanliu/JetClass/Pythia/train_100M/TTBarLep_*.root
+- WToQQ:/global/cfs/cdirs/m3443/usr/ryanliu/JetClass/Pythia/train_100M/WToQQ_*.root
+- ZToQQ:/global/cfs/cdirs/m3443/usr/ryanliu/JetClass/Pythia/train_100M/ZToQQ_*.root
+- ZJetsToNuNu:/global/cfs/cdirs/m3443/usr/ryanliu/JetClass/Pythia/train_100M/ZJetsToNuNu_*.root
+data_val:
+- /global/cfs/cdirs/m3443/usr/ryanliu/JetClass/Pythia/val_5M/*.root
+

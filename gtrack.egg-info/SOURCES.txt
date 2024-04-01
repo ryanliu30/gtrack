@@ -1,0 +1,8 @@
+LICENSE
+README.md
+setup.py
+gtrack/__init__.py
+gtrack.egg-info/PKG-INFO
+gtrack.egg-info/SOURCES.txt
+gtrack.egg-info/dependency_links.txt
+gtrack.egg-info/top_level.txt
