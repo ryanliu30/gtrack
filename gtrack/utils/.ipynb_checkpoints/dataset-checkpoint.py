@@ -1,70 +1,80 @@
-import glob
-from weaver.utils.dataset import SimpleIterDataset
+import torch
+from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import IterableDataset
-from typing import Optional
-import yaml
+import numpy as np
+from toytrack import ParticleGun, Detector, EventGenerator
+from typing import Optional, Union, List
 
-class ConcatDatasets(IterableDataset):
+class TracksDataset(IterableDataset):
     def __init__(
-        self, 
-        dataset1: IterableDataset,
-        dataset2: IterableDataset
-    ) -> IterableDataset:
-        self.dataset1 = dataset1
-        self.dataset2 = dataset2
+            self,
+            hole_inefficiency: Optional[float] = 0,
+            d0: Optional[float] = 0.1,
+            noise: Optional[Union[float, List[float], List[Union[float, str]]]] = 0,
+            minbias_num_dist: Optional[Union[float, List[float], List[Union[float, str]]]] = [50, None, 'poisson'],
+            minbias_pt_dist: Optional[Union[float, List[float], List[Union[float, str]]]] = [1, 10],
+            pileup_num_dist: Optional[Union[float, List[float], List[Union[float, str]]]] = [50, None, 'poisson'],
+            pileup_pt_dist: Optional[Union[float, List[float], List[Union[float, str]]]] = [1, 10],
+            hard_proc_num_dist: Optional[Union[float, List[float], List[Union[float, str]]]] = [5, None, 'poisson'],
+            hard_proc_pt_dist: Optional[Union[float, List[float], List[Union[float, str]]]] = [100, 5, 'normal'],
+        ):
+        super().__init__()
+
+        self.noise = noise
+
+        detector = Detector(
+            dimension=2,
+            hole_inefficiency=hole_inefficiency
+        ).add_from_template(
+            'barrel', 
+            min_radius=0.5, 
+            max_radius=3, 
+            number_of_layers=10,
+        )
         
+        minbias = ParticleGun(
+            dimension=2, 
+            num_particles=minbias_num_dist, 
+            pt=minbias_pt_dist, 
+            pphi=[-np.pi, np.pi], 
+            vx=[0, d0 * 0.5**0.5, 'normal'], 
+            vy=[0, d0 * 0.5**0.5, 'normal'],
+        )
+
+        pileup = ParticleGun(
+            dimension=2, 
+            num_particles=pileup_num_dist, 
+            pt=pileup_pt_dist, 
+            pphi=[-np.pi, np.pi], 
+            vx=[0, d0 * 0.5**0.5, 'normal'], 
+            vy=[0, d0 * 0.5**0.5, 'normal'],
+        )
+
+        hard_proc = ParticleGun(
+            dimension=2, 
+            num_particles=hard_proc_num_dist, 
+            pt=hard_proc_pt_dist, 
+            pphi=[-np.pi, np.pi], 
+            vx=[0, d0 * 0.5**0.5, 'normal'], 
+            vy=[0, d0 * 0.5**0.5, 'normal'],
+        )
+
+        self.minbias_gen = EventGenerator(minbias, detector, noise)
+        self.hard_proc_gen = EventGenerator([pileup, hard_proc], detector, noise)
+
     def __iter__(self):
-        return zip(self.dataset1, self.dataset2)
-
-def load_files(flist):
-    """
-    a helper function to list all root files
-    """
-    file_dict = {}
-    for f in flist:
-        if ':' in f:
-            name, fp = f.split(':')
-        else:
-            name, fp = '_', f
-        files = glob.glob(fp)
-        if name in file_dict:
-            file_dict[name] += files
-        else:
-            file_dict[name] = files
-
-    # sort files
-    for name, files in file_dict.items():
-        file_dict[name] = sorted(files)
-    return file_dict
-
-def get_dataset(
-    stage: str,
-    data_config_file: Optional[str] = "/global/homes/r/ryanliu/JetRep/configs/dataset_config.yaml",
-    loader_config_file: Optional[str] = "/global/homes/r/ryanliu/JetRep/configs/loader_config.yaml",
-) -> SimpleIterDataset:
-    """
-    a helper function to build dataset
-    arguments:
-        stage: a string specifies which dataset to load
-        data_config_file: path to the data pre-processing configuration
-        loader_config_file: path to the data loading/splitting configuration
-    returns:
-        a `SimpleIterDataset`
-    """
-    if not stage in ["train", "train_downstream", "val", "test"]:
-        raise ValueError("Undefined dataset type (train, train_downstream, val, test)")
-    with open(loader_config_file) as f:
-        flist = yaml.load(f, Loader=yaml.FullLoader)[f"data_{stage}"]
-    file_dict = load_files(flist)
+        return self
     
-    dataset = SimpleIterDataset(
-        file_dict, 
-        data_config_file,
-        for_training=(stage != "test"),
-        remake_weights=True,
-        fetch_step=0.001,
-        infinity_mode=False,
-        name=stage
-    )
+    def __next__(self):
+        y = (np.random.rand() < 0.5)
+        if y:
+            event = self.hard_proc_gen.generate_event()
+        else:
+            event = self.minbias_gen.generate_event()
+        x = torch.tensor([event.hits.x, event.hits.y], dtype=torch.float).T.contiguous()
+        mask = torch.ones(x.shape[0], dtype=bool)
+        return x, mask, torch.tensor([y], dtype=torch.float), event
     
-    return dataset
+def collate_fn(ls):
+    x, mask, y, events = zip(*ls)
+    return pad_sequence(x, batch_first=True), pad_sequence(mask, batch_first=True), torch.cat(y), events

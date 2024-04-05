@@ -39,28 +39,6 @@ def make_mlp(
     
     return nn.Sequential(*mlp)
 
-def get_positional_encoding(
-    d_model: int, 
-    max_len: int
-) -> torch.Tensor:
-    """
-    make sinusoidal positional encoding
-    argument:
-        d_model: dimensionality of the encoding
-        max_len: maximum length of the sequence
-    return:
-        a tensor of shape (d_model, max_len)
-    """
-    encodings = torch.zeros(max_len, d_model)
-    position = torch.arange(0, max_len, dtype=torch.float32).unsqueeze(1)
-    two_i = torch.arange(0, d_model, 2, dtype=torch.float32)
-    div_term = torch.exp(two_i * -(math.log(10000.0) / d_model))
-    encodings[:, 0::2] = torch.sin(position * div_term)
-    encodings[:, 1::2] = torch.cos(position * div_term)
-    encodings = encodings.requires_grad_(False)
-
-    return encodings
-
 class SetNorm(nn.Module):
     """
     Implemented SetNorm in `https://arxiv.org/abs/1810.00825`
@@ -83,14 +61,14 @@ class SetNorm(nn.Module):
         mask: Optional[torch.Tensor] = None
     ) -> torch.Tensor:
         """
-        Normalize a batched input of shape (P, N, C), where P is the number
-        of particles (sequence length), N is the batched dimension, and C is
+        Normalize a batched input of shape (H, N, C), where P is the number
+        of hits (sequence length), N is the batched dimension, and C is
         the normalized_shape
         arguments:
-            x: a tensor of shape (P, N, C)
+            x: a tensor of shape (H, N, C)
             mask: a tensor of shape (N, P)
         return
-            normalized inputs of shape (P, N, C)
+            normalized inputs of shape (H, N, C)
         """
         if mask is None:
             mask = torch.zeros((x.shape[1], x.shape[0]), device = x.device, dtype = bool)
@@ -113,7 +91,7 @@ class AttentionBlock(nn.Module):
         d_source: Optional[int] = 512,
         self_attn: Optional[bool] = True,
         cross_attn: Optional[bool] = False,
-        activation: Optional[nn.Module] = nn.GELU()
+        activation: Optional[nn.Module] = nn.LeakyReLU()
     ):
         """
         Initialize an `AttentionBlock` instance
@@ -166,14 +144,14 @@ class AttentionBlock(nn.Module):
         """
         transform the input using the attention block
         arguments:
-            x: input sequence of shape (P, N, C)
+            x: input sequence of shape (H, N, C)
             src: input source sequence of shape (S, N, C')
-            padding_mask: a mask of shape (P, N) with `True` represents a 
-                a real particle
+            padding_mask: a mask of shape (H, N) with `True` represents a 
+                a fake input
             src_padding_mask: a mask of shape (S, N) with `True` represents a 
-                a real input
+                a fake input
         returns:
-            transformed sequence of shape (P, N, C)
+            transformed sequence of shape (H, N, C)
         """
         if hasattr(self, "self_attn"):
             z = self.norm_self_attn(x, padding_mask)
