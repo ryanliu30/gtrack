@@ -16,7 +16,7 @@ def parse_arguments():
     parser.add_argument("--devices", type = int, default=1)
     parser.add_argument("--epochs", type = int, default=1000)
     parser.add_argument("--train-batches", type = int, default=10000)
-    parser.add_argument("--val-batches", type = int, default=2000)
+    parser.add_argument("--val-batches", type = int, default=1000)
     parser.add_argument("--gradient-clip-val", type = float, default=0.5)
     parser.add_argument("--num-sanity-val-steps", type = int, default=0)
     parser.add_argument("--log-period", type = int, default=50)
@@ -42,6 +42,14 @@ def main():
         project = args.project_name, 
         save_dir = args.log_dir
     )
+    checkpoint = ModelCheckpoint(
+        filename="best", 
+        monitor="validation_auc", 
+        save_last=True, 
+        save_top_k=1, 
+        mode='max', 
+        auto_insert_metric_name=False,
+    )
     
     trainer = Trainer(
         accelerator=args.accelerator,
@@ -52,9 +60,10 @@ def main():
         limit_val_batches = args.val_batches,
         num_sanity_val_steps = args.num_sanity_val_steps,
         logger=logger,
-        callbacks=[ModelCheckpoint()],
+        callbacks=[checkpoint],
         log_every_n_steps = args.log_period,
-        default_root_dir = args.log_dir
+        default_root_dir = args.log_dir,
+        reload_dataloaders_every_n_epochs=1
     )
     trainer.fit(model)
 

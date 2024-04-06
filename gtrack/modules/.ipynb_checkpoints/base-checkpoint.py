@@ -17,6 +17,8 @@ class BaseModule(ABC, LightningModule):
             lr: Optional[float] = 1e-3,
             patience: Optional[int] = 10,
             factor: Optional[float] = 1,
+            curriculum: Optional[int] = 0,
+            min_scale: Optional[float] = 0.,
             dataset_args: Optional[Dict[str, Any]] = {},
         ):
         super().__init__()
@@ -25,19 +27,30 @@ class BaseModule(ABC, LightningModule):
         """
         self.save_hyperparameters()
     
-    def _get_dataloader(self):
+    def _get_dataloader(self, is_training = False):
+        dataset_args = self.hparams["dataset_args"].copy()
+        if is_training and (self.trainer.current_epoch < self.hparams.get("curriculum", 0)):
+            for name in ["minbias_lambda", "pileup_lambda", "hard_proc_lambda"]:
+                if name in dataset_args:
+                    dataset_args[name] *= (
+                        (1 - self.hparams.get("min_scale", 0)) * self.trainer.current_epoch / self.hparams.get("curriculum", 0)
+                        + self.hparams.get("min_scale", 0)
+                    )
+            
         dataset = TracksDataset(
-            **self.hparams["dataset_args"]
+            **dataset_args
         )
+        
         return DataLoader(
             dataset,
             batch_size=self.hparams["batch_size"],
             collate_fn=collate_fn,
             num_workers=32,
+            persistent_workers=True
         )
     
     def train_dataloader(self):
-        return self._get_dataloader()
+        return self._get_dataloader(is_training = True)
 
     def val_dataloader(self):
         return self._get_dataloader()
@@ -74,10 +87,11 @@ class BaseModule(ABC, LightningModule):
         raise NotImplementedError("implement anomaly detection method!")
     
     def training_step(self, batch, batch_idx):
-        x, mask, y, _ = batch
+        x, mask, y, dfs = batch
         predictions = self.predict(x, mask)
         loss = F.binary_cross_entropy_with_logits(predictions, y)
         self.log("training_loss", loss, on_step=True)
+        self.log("num_particles", sum([len(df) for df in dfs]) / len(dfs), on_step=True)
         return loss
     
     def shared_evaluation(self, batch, batch_idx, log=False):

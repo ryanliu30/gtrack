@@ -20,6 +20,8 @@ class Transformer(BaseModule):
             lr: Optional[float] = 1e-3,
             patience: Optional[int] = 10,
             factor: Optional[float] = 1,
+            curriculum: Optional[int] = 0,
+            min_scale: Optional[float] = 0.,
             dataset_args: Optional[Dict[str, Any]] = {},
         ):
         
@@ -29,6 +31,8 @@ class Transformer(BaseModule):
             lr=lr,
             patience=patience,
             factor=factor,
+            curriculum=curriculum,
+            min_scale=min_scale,
             dataset_args=dataset_args
         )
         

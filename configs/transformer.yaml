@@ -5,18 +5,20 @@ heads: 8
 n_layers: 16
 n_pool_layer: 2
 dropout: 0.
-batch_size: 64
+batch_size: 32
 warmup: 1000
 lr: 0.001
 patience: 100
 factor: 1
+curriculum: 100
+min_scale: 0.1
 dataset_args:
-  hole_inefficiency: 0.1
-  d0: 0.1
-  noise: 0.1
-  minbias_num_dist: [25, null, poisson]
-  minbias_pt_dist: [1, 5]
-  pileup_num_dist: [20, null, poisson]
-  pileup_pt_dist: [1, 5]
-  hard_proc_num_dist: [5, null, poisson]
-  hard_proc_pt_dist: [100, 5, normal]
+    hole_inefficiency: 0.1
+    d0: 0.1
+    noise: 0.1
+    minbias_lambda: 50
+    pileup_lambda: 45
+    hard_proc_lambda: 5
+    minbias_pt_dist: [1, 5]
+    pileup_pt_dist: [1, 5]
+    hard_proc_pt_dist: [100, 5, normal]
