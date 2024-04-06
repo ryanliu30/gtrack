@@ -130,3 +130,6 @@ dmypy.json
 
 # Logging files
 wandb/
+
+# ipynb artifacts
+.ipynb_checkpoints
