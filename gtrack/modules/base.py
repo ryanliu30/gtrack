@@ -3,6 +3,7 @@ from lightning.pytorch.core import LightningModule
 import torch
 from torch.utils.data import DataLoader
 import torch.nn.functional as F
+import numpy as np
 from sklearn.metrics import roc_auc_score
 from gtrack.utils import TracksDataset, collate_fn
 from typing import Dict, Any, Optional
@@ -17,7 +18,8 @@ class BaseModule(ABC, LightningModule):
             lr: Optional[float] = 1e-3,
             patience: Optional[int] = 10,
             factor: Optional[float] = 1,
-            curriculum: Optional[int] = 0,
+            curriculum: Optional[str] = "1",
+            t0: Optional[int] = 0,
             min_scale: Optional[float] = 0.,
             dataset_args: Optional[Dict[str, Any]] = {},
         ):
@@ -29,13 +31,14 @@ class BaseModule(ABC, LightningModule):
     
     def _get_dataloader(self, is_training = False):
         dataset_args = self.hparams["dataset_args"].copy()
-        if is_training and (self.trainer.current_epoch < self.hparams.get("curriculum", 0)):
+        if is_training and (self.trainer.current_epoch < self.hparams.get("t0", 0)):
+            t = self.trainer.current_epoch / self.hparams.get("t0", 0)
+            ratio = eval(self.hparams.get("curriculum", "1"))
             for name in ["minbias_lambda", "pileup_lambda", "hard_proc_lambda"]:
                 if name in dataset_args:
-                    dataset_args[name] *= (
-                        (1 - self.hparams.get("min_scale", 0)) * self.trainer.current_epoch / self.hparams.get("curriculum", 0)
-                        + self.hparams.get("min_scale", 0)
-                    )
+                    dataset_args[name] *= ratio
+        else:
+            ratio = 1
             
         dataset = TracksDataset(
             **dataset_args
@@ -43,9 +46,9 @@ class BaseModule(ABC, LightningModule):
         
         return DataLoader(
             dataset,
-            batch_size=self.hparams["batch_size"],
+            batch_size=round(self.hparams["batch_size"] / max(ratio, 0.25)),
             collate_fn=collate_fn,
-            num_workers=32,
+            num_workers=self.hparams["workers"],
             persistent_workers=True
         )
     
@@ -87,11 +90,11 @@ class BaseModule(ABC, LightningModule):
         raise NotImplementedError("implement anomaly detection method!")
     
     def training_step(self, batch, batch_idx):
-        x, mask, y, dfs = batch
+        x, mask, y, events = batch
         predictions = self.predict(x, mask)
         loss = F.binary_cross_entropy_with_logits(predictions, y)
         self.log("training_loss", loss, on_step=True)
-        self.log("num_particles", sum([len(df) for df in dfs]) / len(dfs), on_step=True)
+        self.log("num_particles", sum([len(event.particles) for event in events]) / len(events), on_step=True)
         return loss
     
     def shared_evaluation(self, batch, batch_idx, log=False):
@@ -102,15 +105,17 @@ class BaseModule(ABC, LightningModule):
         y = y.cpu().numpy()
         roc_score = roc_auc_score(y, scores)
         accuracy = (y == (scores >= 0.5)).sum() / len(y)
-        self.log("validation_loss", loss, on_epoch=True)
-        self.log("validation_accuracy", accuracy, on_epoch=True)
-        self.log("validation_auc", roc_score, on_epoch=True)
+        
+        self.log("validation_accuracy", accuracy.item(), on_epoch=True, sync_dist=True)
+        self.log("validation_auc", roc_score, on_epoch=True, sync_dist=True)
+        self.log("validation_loss", loss.item(), on_epoch=True, sync_dist=True)
 
     def validation_step(self, batch, batch_idx):
         self.shared_evaluation(batch, batch_idx)
 
     def test_step(self, batch, batch_idx):
         self.shared_evaluation(batch, batch_idx)
+        
 
     def optimizer_step(
         self,

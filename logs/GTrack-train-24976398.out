@@ -1,0 +1,97 @@
+
+Starting training
+
+Setting default root dir: /global/cfs/cdirs/m3443/usr/ryanliu/set_tracking/geometric-transformer/24976398
+Job ID: 24976398, resume: allow
+Setting default root dir: /global/cfs/cdirs/m3443/usr/ryanliu/set_tracking/geometric-transformer/24976398
+Setting default root dir: /global/cfs/cdirs/m3443/usr/ryanliu/set_tracking/geometric-transformer/24976398
+Job ID: 24976398, resume: allow
+Job ID: 24976398, resume: allow
+Initializing distributed: GLOBAL_RANK: 2, MEMBER: 3/4
+Initializing distributed: GLOBAL_RANK: 3, MEMBER: 4/4
+Initializing distributed: GLOBAL_RANK: 1, MEMBER: 2/4
+Setting default root dir: /global/cfs/cdirs/m3443/usr/ryanliu/set_tracking/geometric-transformer/24976398
+Job ID: 24976398, resume: allow
+Traceback (most recent call last):
+  File "/global/u2/r/ryanliu/gtrack/run.py", line 38, in <module>
+    main()
+  File "/global/u2/r/ryanliu/gtrack/run.py", line 33, in main
+    trainer = get_trainer(config, default_root_dir)
+  File "/global/u2/r/ryanliu/gtrack/gtrack/utils/training_utils.py", line 82, in get_trainer
+    hasattr(logger, "experiment")
+  File "/global/homes/r/ryanliu/.conda/envs/gtrack/lib/python3.10/site-packages/lightning/fabric/loggers/logger.py", line 118, in experiment
+    return fn(self)
+  File "/global/homes/r/ryanliu/.conda/envs/gtrack/lib/python3.10/site-packages/lightning/pytorch/loggers/wandb.py", line 401, in experiment
+    self._experiment = wandb.init(**self._wandb_init)
+  File "/global/homes/r/ryanliu/.conda/envs/gtrack/lib/python3.10/site-packages/wandb/sdk/wandb_init.py", line 1206, in init
+    raise e
+  File "/global/homes/r/ryanliu/.conda/envs/gtrack/lib/python3.10/site-packages/wandb/sdk/wandb_init.py", line 1183, in init
+    wi.setup(kwargs)
+  File "/global/homes/r/ryanliu/.conda/envs/gtrack/lib/python3.10/site-packages/wandb/sdk/wandb_init.py", line 190, in setup
+    self._wl = wandb_setup.setup(settings=setup_settings)
+  File "/global/homes/r/ryanliu/.conda/envs/gtrack/lib/python3.10/site-packages/wandb/sdk/wandb_setup.py", line 327, in setup
+    ret = _setup(settings=settings)
+  File "/global/homes/r/ryanliu/.conda/envs/gtrack/lib/python3.10/site-packages/wandb/sdk/wandb_setup.py", line 320, in _setup
+    wl = _WandbSetup(settings=settings)
+  File "/global/homes/r/ryanliu/.conda/envs/gtrack/lib/python3.10/site-packages/wandb/sdk/wandb_setup.py", line 303, in __init__
+    _WandbSetup._instance = _WandbSetup__WandbSetup(settings=settings, pid=pid)
+  File "/global/homes/r/ryanliu/.conda/envs/gtrack/lib/python3.10/site-packages/wandb/sdk/wandb_setup.py", line 114, in __init__
+    self._setup()
+  File "/global/homes/r/ryanliu/.conda/envs/gtrack/lib/python3.10/site-packages/wandb/sdk/wandb_setup.py", line 250, in _setup
+    self._setup_manager()
+  File "/global/homes/r/ryanliu/.conda/envs/gtrack/lib/python3.10/site-packages/wandb/sdk/wandb_setup.py", line 277, in _setup_manager
+    self._manager = wandb_manager._Manager(settings=self._settings)
+  File "/global/homes/r/ryanliu/.conda/envs/gtrack/lib/python3.10/site-packages/wandb/sdk/wandb_manager.py", line 139, in __init__
+    self._service.start()
+  File "/global/homes/r/ryanliu/.conda/envs/gtrack/lib/python3.10/site-packages/wandb/sdk/service/service.py", line 250, in start
+    self._launch_server()
+  File "/global/homes/r/ryanliu/.conda/envs/gtrack/lib/python3.10/site-packages/wandb/sdk/service/service.py", line 244, in _launch_server
+    _sentry.reraise(e)
+  File "/global/homes/r/ryanliu/.conda/envs/gtrack/lib/python3.10/site-packages/wandb/analytics/sentry.py", line 154, in reraise
+    raise exc.with_traceback(sys.exc_info()[2])
+  File "/global/homes/r/ryanliu/.conda/envs/gtrack/lib/python3.10/site-packages/wandb/sdk/service/service.py", line 242, in _launch_server
+    self._wait_for_ports(fname, proc=internal_proc)
+  File "/global/homes/r/ryanliu/.conda/envs/gtrack/lib/python3.10/site-packages/wandb/sdk/service/service.py", line 132, in _wait_for_ports
+    raise ServiceStartTimeoutError(
+wandb.sdk.service.service.ServiceStartTimeoutError: Timed out waiting for wandb service to start after 30.0 seconds. Try increasing the timeout with the `_service_wait` setting.
+srun: error: nid002217: task 0: Exited with exit code 1
+srun: Terminating StepId=24976398.0
+Traceback (most recent call last):
+  File "/global/homes/r/ryanliu/.conda/envs/gtrack/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/global/homes/r/ryanliu/.conda/envs/gtrack/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/global/homes/r/ryanliu/.conda/envs/gtrack/lib/python3.10/site-packages/wandb/__main__.py", line 3, in <module>
+    cli.cli(prog_name="python -m wandb")
+  File "/global/homes/r/ryanliu/.conda/envs/gtrack/lib/python3.10/site-packages/click/core.py", line 1157, in __call__
+    return self.main(*args, **kwargs)
+  File "/global/homes/r/ryanliu/.conda/envs/gtrack/lib/python3.10/site-packages/click/core.py", line 1078, in main
+    rv = self.invoke(ctx)
+  File "/global/homes/r/ryanliu/.conda/envs/gtrack/lib/python3.10/site-packages/click/core.py", line 1688, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+  File "/global/homes/r/ryanliu/.conda/envs/gtrack/lib/python3.10/site-packages/click/core.py", line 1434, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+  File "/global/homes/r/ryanliu/.conda/envs/gtrack/lib/python3.10/site-packages/click/core.py", line 783, in invoke
+    return __callback(*args, **kwargs)
+  File "/global/homes/r/ryanliu/.conda/envs/gtrack/lib/python3.10/site-packages/wandb/cli/cli.py", line 105, in wrapper
+    return func(*args, **kwargs)
+  File "/global/homes/r/ryanliu/.conda/envs/gtrack/lib/python3.10/site-packages/wandb/cli/cli.py", line 289, in service
+    server.serve()
+  File "/global/homes/r/ryanliu/.conda/envs/gtrack/lib/python3.10/site-packages/wandb/sdk/service/server.py", line 114, in serve
+    self._inform_used_ports(sock_port=sock_port)
+  File "/global/homes/r/ryanliu/.conda/envs/gtrack/lib/python3.10/site-packages/wandb/sdk/service/server.py", line 52, in _inform_used_ports
+    pf.write(self._port_fname)
+  File "/global/homes/r/ryanliu/.conda/envs/gtrack/lib/python3.10/site-packages/wandb/sdk/service/port_file.py", line 21, in write
+    f = tempfile.NamedTemporaryFile(prefix=bname, dir=dname, mode="w", delete=False)
+  File "/global/homes/r/ryanliu/.conda/envs/gtrack/lib/python3.10/tempfile.py", line 575, in NamedTemporaryFile
+    file = _io.open(dir, mode, buffering=buffering,
+  File "/global/homes/r/ryanliu/.conda/envs/gtrack/lib/python3.10/tempfile.py", line 572, in opener
+    fd, name = _mkstemp_inner(dir, prefix, suffix, flags, output_type)
+  File "/global/homes/r/ryanliu/.conda/envs/gtrack/lib/python3.10/tempfile.py", line 256, in _mkstemp_inner
+    fd = _os.open(file, flags, 0o600)
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmppv9r_5mt/port-277885.txtchdsoyrd'
+slurmstepd: error: *** STEP 24976398.0 ON nid002217 CANCELLED AT 2024-04-30T04:36:09 ***
+srun: error: nid002217: task 2: Terminated
+srun: error: nid002217: task 3: Terminated
+srun: error: nid002217: task 1: Terminated
+srun: Force Terminated StepId=24976398.0
